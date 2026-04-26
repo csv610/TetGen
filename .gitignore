@@ -1,0 +1,22 @@
+# Build artifacts
+build/
+bin/
+obj/
+*.o
+*.a
+*.exe
+tetgen
+
+# Benchmarks output
+bench/*.csv
+bench/*.png
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*~
