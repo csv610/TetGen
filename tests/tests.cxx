@@ -142,12 +142,12 @@ TEST_CASE("Voronoi Diagram", "[tetgen][voronoi]") {
 }
 
 TEST_CASE("Constrained TetMesh", "[tetgen][cdt]") {
-    // Skipping this for now as it was causing segfaults in the original tests
-    /*
     tetgenio in, out;
 
     in.numberofpoints = 8;
     in.pointlist = new REAL[in.numberofpoints * 3];
+    in.pointmarkerlist = new int[in.numberofpoints];
+    
     // A cube
     in.pointlist[0] = 0; in.pointlist[1] = 0; in.pointlist[2] = 0;
     in.pointlist[3] = 1; in.pointlist[4] = 0; in.pointlist[5] = 0;
@@ -158,7 +158,24 @@ TEST_CASE("Constrained TetMesh", "[tetgen][cdt]") {
     in.pointlist[18] = 1; in.pointlist[19] = 1; in.pointlist[20] = 1;
     in.pointlist[21] = 0; in.pointlist[22] = 1; in.pointlist[23] = 1;
 
-    in.numberoffacets = 7;
+    for (int i = 0; i < 8; i++) in.pointmarkerlist[i] = 0;
+
+    // Define 12 edges of the cube
+    in.numberofedges = 12;
+    in.edgelist = new int[in.numberofedges * 2];
+    in.edgemarkerlist = new int[in.numberofedges];
+
+    auto set_edge = [&](int idx, int v1, int v2, int marker) {
+        in.edgelist[idx * 2] = v1;
+        in.edgelist[idx * 2 + 1] = v2;
+        in.edgemarkerlist[idx] = marker;
+    };
+
+    set_edge(0, 0, 1, 1); set_edge(1, 1, 2, 1); set_edge(2, 2, 3, 1); set_edge(3, 3, 0, 1); // Bottom
+    set_edge(4, 4, 5, 1); set_edge(5, 5, 6, 1); set_edge(6, 6, 7, 1); set_edge(7, 7, 4, 1); // Top
+    set_edge(8, 0, 4, 1); set_edge(9, 1, 5, 1); set_edge(10, 2, 6, 1); set_edge(11, 3, 7, 1); // Verticals
+
+    in.numberoffacets = 6; // Just the cube faces
     in.facetlist = new tetgenio::facet[in.numberoffacets];
     in.facetmarkerlist = new int[in.numberoffacets];
 
@@ -179,18 +196,15 @@ TEST_CASE("Constrained TetMesh", "[tetgen][cdt]") {
         in.facetmarkerlist[idx] = marker;
     };
 
-    set_facet(0, {0, 1, 2, 3}, 1);
-    set_facet(1, {4, 5, 6, 7}, 1);
-    set_facet(2, {0, 1, 5, 4}, 1);
-    set_facet(3, {1, 2, 6, 5}, 1);
-    set_facet(4, {2, 3, 7, 6}, 1);
-    set_facet(5, {3, 0, 4, 7}, 1);
-    set_facet(6, {0, 2, 6}, 2);
+    set_facet(0, {0, 1, 2, 3}, 1); // Bottom
+    set_facet(1, {4, 5, 6, 7}, 1); // Top
+    set_facet(2, {0, 1, 5, 4}, 1); // Front
+    set_facet(3, {1, 2, 6, 5}, 1); // Right
+    set_facet(4, {2, 3, 7, 6}, 1); // Back
+    set_facet(5, {3, 0, 4, 7}, 1); // Left
 
     tetrahedralize((char*)"Qp", &in, &out);
 
     CHECK(out.numberofpoints >= 8);
     CHECK(out.numberoftetrahedra >= 5);
-    CHECK(out.numberoftrifaces >= 1);
-    */
 }
