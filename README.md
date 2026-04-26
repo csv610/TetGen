@@ -1,35 +1,51 @@
-TetGen
-======
+# TetGen (Mac-M1 Port)
 
-TetGen is a program to generate tetrahedral meshes of any 3D polyhedral domains.  TetGen generates exact constrained Delaunay tetrahedralizations, boundary conforming Delaunay meshes, and Voronoi partitions.
+This repository is a specialized port of **TetGen** for Apple Silicon (Mac M1/M2/M3). 
 
-TetGen versions up to v1.6.0 have been developed headed by [Hang Si](https://github.com/sihang0592) during his affiliation with [Weierstrass Institute for Applied Analysis and Stochastics, (WIAS) Berlin](https://www.wias-berlin.de/software/tetgen).
+### 📜 Attribution & Credits
+**All credits for the original research, algorithms, and core implementation go to [Hang Si](https://github.com/sihang0592)**. This software was developed during his affiliation with the [Weierstrass Institute for Applied Analysis and Stochastics (WIAS) Berlin](https://www.wias-berlin.de/software/tetgen). 
 
-The primary development repository is [https://codeberg.org/TetGen/TetGen](https://codeberg.org/TetGen/TetGen). Please
-open any issues in this repository. The github repository [https://github.com/TetGen/Tetgen](https://github.com/TetGen/Tetgen)
-is a mirror of the codeberg repository.
+The primary development repository for the original project is [https://codeberg.org/TetGen/TetGen](https://codeberg.org/TetGen/TetGen).
 
-This repository provides the source code of the most recent versions of TetGen.
-The following releases are provided:
-- [v1.4.3, 2011](https://codeberg.org/TetGen/TetGen/archive/v1.4.3.tar.gz): [MIT license with noncommercial clause](https://raw.githubusercontent.com/TetGen/TetGen/refs/tags/v1.4.3/LICENSE).
-- [v1.5.0, 2013](https://codeberg.org/TetGen/TetGen/archive/v1.5.0.tar.gz): [AGPLv3 license](https://www.gnu.org/licenses/agpl-3.0.html).
-- [v1.5.1, 2018](https://codeberg.org/TetGen/TetGen/archive/v1.5.1.tar.gz): [AGPLv3 license](https://www.gnu.org/licenses/agpl-3.0.html), recommended as most stable version.
-- [v1.6.0, 2020](https://codeberg.org/TetGen/TetGen/archive/v1.6.0.tar.gz): [AGPLv3 license](https://www.gnu.org/licenses/agpl-3.0.html), most recent version with some rough edges.
+---
 
-It is planned to resume active development of TetGen in cooperation between the main developer Hang Si and  the Weierstrass Institute. Future versions of TetGen will be published via this repository.
+### 🚀 Contributions in this Port
+This fork introduces several enhancements to make TetGen more robust and easier to evaluate on modern hardware:
 
-## Documentation
-- Manuals are available in https://codeberg.org/TetGen/Manuals.
-- A technical paper about TetGen is available at [Hang Si, "TetGen, a Delaunay-Based Quality Tetrahedral Mesh Generator". ACM Trans. on Mathematical Software. 41 (2), 2015](http://doi.acm.org/10.1145/2629697)
-  
-  
-## Commercial licensing
+1.  **Mac-M1 Optimization**: Build configurations and source adjustments specifically for Apple Silicon (ARM64) architecture.
+2.  **Comprehensive Benchmarking Suite**:
+    *   New high-performance benchmarks for **Delaunay Triangulation**, **Convex Hull**, **Voronoi Diagrams**, and **Constrained Delaunay (CDT)**.
+    *   Scalability testing from **10,000 to 1,000,000 points**.
+    *   Automated Python runner (`bench/run_benchmarks.py`) with CSV data export for performance analysis.
+3.  **Unit Testing Framework**:
+    *   Added a structured testing suite in `tests/` to ensure geometric correctness and stability during the porting process.
+4.  **Project Modernization**:
+    *   Restructured source code into a clean `src/` directory.
+    *   Integrated CMake build system for seamless compilation.
 
-TetGen versions developed at WIAS are distributed under a dual licensing scheme.  As an alternative to the use of TetGen under the AGPLv3 license, consider the option to obtain a commercial license for a fee.  These licenses are offered by the Weierstrass Institute for Applied Analysis and Stochastics (WIAS). As a rule, licenses are provided "as-is", unlimited in time for a one time fee.  Please send corresponding requests to: `tetgen at wias-berlin.de`.  Please do not forget to include some description of your company and the realm of its activities.
+---
 
-Details about the extension of this dual licensing scheme for future versions of TetGen will be announced in due time.
+## Getting Started
 
-## Contributing
+### Prerequisites
+- macOS (Optimized for M1/M2/M3)
+- CMake 3.5+
+- C++11 compatible compiler (Clang/GCC)
 
-By submitting a contribution (including but not limited to code, documentation, or other materials) via a pull request, issue, or other means, a contributor agrees to the terms of the contributor license agreement stated in [CONTRIBUTING.md](CONTRIBUTING.md). It is planned to revise this agreement, once the extension of the dual licensing scheme has been set up.
+### Build Instructions
+```bash
+mkdir build && cd build
+cmake ..
+make -j$(sysctl -n hw.ncpu)
+```
 
+### Running Benchmarks
+To run the full suite and generate performance data:
+```bash
+python3 bench/run_benchmarks.py
+```
+
+## Documentation & Licensing
+TetGen is distributed under the **AGPLv3 license**. For original documentation, manuals, and technical papers by Hang Si, please visit the [official WIAS TetGen page](https://www.wias-berlin.de/software/tetgen).
+
+Commercial licenses for TetGen are offered by the Weierstrass Institute. Please contact `tetgen at wias-berlin.de` for details.
