@@ -45,6 +45,14 @@ public:
     void setVerbose(int level);
     
     /**
+     * @brief Sets constraints for an isotropic mesh based on desired edge length.
+     * 
+     * Calculates the maximum volume based on the edge length of a regular tetrahedron
+     * and sets a quality bound (radius-edge ratio) to 1.414.
+     */
+    void setIsotropic(double edgeLength);
+
+    /**
      * @brief Allows setting any TetGen switch directly via a string.
      * Example: "pq1.414a.1" for quality and volume constraints.
      */

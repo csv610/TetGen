@@ -3,6 +3,7 @@
 #include "tetgen.h"
 #include <sstream>
 #include <iomanip>
+#include <cmath>
 
 struct TetMeshGenerator::Impl {
     tetgenio in;
@@ -73,6 +74,14 @@ void TetMeshGenerator::setCheck(bool enable) {
 
 void TetMeshGenerator::setVerbose(int level) {
     impl->behavior.verbose = level;
+}
+
+void TetMeshGenerator::setIsotropic(double edgeLength) {
+    impl->behavior.quality = 1;
+    impl->behavior.minratio = 1.414;
+    impl->behavior.fixedvolume = 1;
+    // Volume of a regular tetrahedron with side length L: V = L^3 / (6 * sqrt(2))
+    impl->behavior.maxvolume = (edgeLength * edgeLength * edgeLength) / (6.0 * std::sqrt(2.0));
 }
 
 void TetMeshGenerator::setCustomSwitches(const std::string& switches) {

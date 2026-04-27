@@ -208,3 +208,52 @@ TEST_CASE("Constrained TetMesh", "[tetgen][cdt]") {
     CHECK(out.numberofpoints >= 8);
     CHECK(out.numberoftetrahedra >= 5);
 }
+
+#include "TetMeshGenerator.h"
+#include "MeshOptimizer.hpp"
+
+TEST_CASE("MeshOptimizer with TetMeshGenerator", "[optimizer]") {
+    TetMeshGenerator gen;
+    
+    // Create a simple box
+    gen.addPoint(0, 0, 0);
+    gen.addPoint(1, 0, 0);
+    gen.addPoint(1, 1, 0);
+    gen.addPoint(0, 1, 0);
+    gen.addPoint(0, 0, 1);
+    gen.addPoint(1, 0, 1);
+    gen.addPoint(1, 1, 1);
+    gen.addPoint(0, 1, 1);
+    
+    gen.addFacet({0, 1, 2, 3});
+    gen.addFacet({4, 5, 6, 7});
+    gen.addFacet({0, 1, 5, 4});
+    gen.addFacet({2, 3, 7, 6});
+    gen.addFacet({0, 3, 7, 4});
+    gen.addFacet({1, 2, 6, 5});
+    
+    gen.setPLC(true);
+    gen.setIsotropic(0.5); // A few points inside
+    
+    TetMeshGenerator::Mesh mesh = gen.generate();
+    
+    size_t initial_count = mesh.points.size();
+    REQUIRE(initial_count > 8);
+
+    auto isFixed = [](const TetMeshGenerator::Point& p) {
+        const double eps = 1e-6;
+        return (p.x < eps || p.x > 1.0 - eps ||
+                p.y < eps || p.y > 1.0 - eps ||
+                p.z < eps || p.z > 1.0 - eps);
+    };
+
+    SECTION("Laplacian Smoothing") {
+        MeshOptimizer::smooth(mesh.points, mesh.tetrahedra, 2, isFixed);
+        CHECK(mesh.points.size() == initial_count);
+    }
+
+    SECTION("ODT Relaxation") {
+        MeshOptimizer::relaxODT(mesh.points, mesh.tetrahedra, 2, isFixed);
+        CHECK(mesh.points.size() == initial_count);
+    }
+}
