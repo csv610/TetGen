@@ -4,7 +4,7 @@ cmake_minimum_required(VERSION 3.5)
 project(TetGen LANGUAGES CXX)
 
 # Use C++14 or higher for Catch2 v3 compatibility
-set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # -----------------------------------------------------------------------------
