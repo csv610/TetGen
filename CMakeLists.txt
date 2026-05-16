@@ -11,6 +11,9 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 # Main Library and Executable
 # -----------------------------------------------------------------------------
 
+# Find Assimp
+find_package(assimp REQUIRED)
+
 # Add a static library for TetGen core
 add_library(tet STATIC 
     src/tetgen.cxx 
@@ -34,6 +37,26 @@ target_include_directories(tet_cpp PUBLIC cpp src)
 # Add the main tetgen CLI tool
 add_executable(tetgen src/tetgen.cxx src/predicates.cxx)
 target_include_directories(tetgen PRIVATE src)
+
+# -----------------------------------------------------------------------------
+# Applications
+# -----------------------------------------------------------------------------
+
+add_executable(random_points_delaunay apps/random_points_delaunay.cpp)
+target_link_libraries(random_points_delaunay PRIVATE tet_cpp)
+target_include_directories(random_points_delaunay PRIVATE src cpp)
+
+add_executable(random_convex_hull apps/random_convex_hull.cpp)
+target_link_libraries(random_convex_hull PRIVATE tet_cpp)
+target_include_directories(random_convex_hull PRIVATE src cpp)
+
+add_executable(cdt apps/cdt.cpp)
+target_link_libraries(cdt PRIVATE tet_cpp assimp::assimp)
+target_include_directories(cdt PRIVATE src cpp)
+
+add_executable(mesh_convex_hull apps/mesh_convex_hull.cpp)
+target_link_libraries(mesh_convex_hull PRIVATE tet_cpp assimp::assimp)
+target_include_directories(mesh_convex_hull PRIVATE src cpp)
 
 # -----------------------------------------------------------------------------
 # Benchmarks
