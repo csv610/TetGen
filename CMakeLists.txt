@@ -19,8 +19,9 @@ add_library(tet STATIC
 
 # Add a static library for C++ wrappers
 add_library(tet_cpp STATIC
-    cpp/TetMeshGenerator.cpp
+    cpp/TetDelMesher.cpp
     cpp/MeshOptimizer.cpp
+    cpp/Mesh.cpp
 )
 
 # Set TETLIBRARY definition for the library and include headers from src/ and cpp/
@@ -40,8 +41,8 @@ target_include_directories(tetgen PRIVATE src)
 
 macro(add_tetgen_bench bench_name)
     add_executable(${bench_name} bench/${bench_name}.cxx)
-    target_link_libraries(${bench_name} PRIVATE tet)
-    target_include_directories(${bench_name} PRIVATE bench src)
+    target_link_libraries(${bench_name} PRIVATE tet_cpp)
+    target_include_directories(${bench_name} PRIVATE bench src cpp)
 endmacro()
 
 add_tetgen_bench(bench_delaunay)

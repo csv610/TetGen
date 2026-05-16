@@ -1,15 +1,19 @@
 #include "utils.h"
+#include "TetDelMesher.h"
 
 int run_bench(int n) {
-    tetgenio in, out;
-    in.numberofpoints = n;
-    in.pointlist = new REAL[n * 3];
-    generate_random_points(n, in.pointlist);
+    TetDelMesher gen;
+    std::vector<double> points(n * 3);
+    generate_random_points(n, points.data());
+    
+    for (int i = 0; i < n; ++i) {
+        gen.addPoint(points[i * 3], points[i * 3 + 1], points[i * 3 + 2]);
+    }
 
-    // -c: Convex hull only
-    // -Q: Quiet
-    tetrahedralize((char*)"cQ", &in, &out);
-    return out.numberoftetrahedra;
+    gen.setConvexHull(true);
+    gen.setQuiet(true);
+    auto mesh = gen.generate();
+    return static_cast<int>(mesh.tetrahedra.size());
 }
 
 int main() {

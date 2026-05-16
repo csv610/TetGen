@@ -1,9 +1,9 @@
-#include "TetMeshGenerator.h"
+#include "TetDelMesher.h"
 #include <iostream>
 #include <cassert>
 
 int main() {
-    TetMeshGenerator gen;
+    TetDelMesher gen;
     
     // Create a simple box
     gen.addPoint(0, 0, 0);
@@ -26,7 +26,7 @@ int main() {
     gen.setPLC(true);
     gen.setIsotropic(0.2); // Small edge length for isotropic mesh
     
-    TetMeshGenerator::Mesh mesh = gen.generate();
+    Mesh mesh = gen.generate();
     
     std::cout << "Points: " << mesh.points.size() << std::endl;
     std::cout << "Tetrahedra: " << mesh.tetrahedra.size() << std::endl;

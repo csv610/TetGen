@@ -6,7 +6,7 @@
 #include <set>
 
 namespace {
-    using Point = TetMeshGenerator::Point;
+    using Point = Mesh::Point;
 
     double getVolume(const Point& a, const Point& b, const Point& c, const Point& d) {
         double ax = a.x - d.x, ay = a.y - d.y, az = a.z - d.z;
@@ -43,8 +43,8 @@ namespace {
     }
 }
 
-void MeshOptimizer::smooth(std::vector<TetMeshGenerator::Point>& points, 
-                         const std::vector<TetMeshGenerator::Tetrahedron>& tetrahedra, 
+void MeshOptimizer::smooth(std::vector<Mesh::Point>& points, 
+                         const std::vector<Mesh::Tetrahedron>& tetrahedra, 
                          int iterations, 
                          FixedPredicate isFixed) {
     if (points.empty()) return;
@@ -78,8 +78,8 @@ void MeshOptimizer::smooth(std::vector<TetMeshGenerator::Point>& points,
     }
 }
 
-void MeshOptimizer::relaxODT(std::vector<TetMeshGenerator::Point>& points, 
-                           const std::vector<TetMeshGenerator::Tetrahedron>& tetrahedra, 
+void MeshOptimizer::relaxODT(std::vector<Mesh::Point>& points, 
+                           const std::vector<Mesh::Tetrahedron>& tetrahedra, 
                            int iterations, 
                            FixedPredicate isFixed) {
     if (points.empty() || tetrahedra.empty()) return;

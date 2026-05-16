@@ -1,8 +1,6 @@
 #ifndef BENCH_UTILS_H
 #define BENCH_UTILS_H
 
-#define TETLIBRARY
-#include "tetgen.h"
 #include <chrono>
 #include <vector>
 #include <random>
@@ -17,9 +15,9 @@ struct BenchResult {
     int output_tets;
 };
 
-inline void generate_random_points(int n, REAL* pointlist) {
+inline void generate_random_points(int n, double* pointlist) {
     std::mt19937 gen(42);
-    std::uniform_real_distribution<REAL> dis(-100.0, 100.0);
+    std::uniform_real_distribution<double> dis(-100.0, 100.0);
     for (int i = 0; i < n * 3; ++i) {
         pointlist[i] = dis(gen);
     }

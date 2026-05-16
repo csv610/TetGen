@@ -1,6 +1,6 @@
 #pragma once
 
-#include "TetMeshGenerator.h"
+#include "Mesh.h"
 #include <vector>
 #include <functional>
 
@@ -10,15 +10,15 @@
 class MeshOptimizer {
 public:
     /// Returns true if the point should remain fixed (not moved).
-    using FixedPredicate = std::function<bool(const TetMeshGenerator::Point&)>;
+    using FixedPredicate = std::function<bool(const Mesh::Point&)>;
 
-    static void smooth(std::vector<TetMeshGenerator::Point>& points, 
-                      const std::vector<TetMeshGenerator::Tetrahedron>& tetrahedra, 
+    static void smooth(std::vector<Mesh::Point>& points, 
+                      const std::vector<Mesh::Tetrahedron>& tetrahedra, 
                       int iterations = 1,
                       FixedPredicate isFixed = nullptr);
 
-    static void relaxODT(std::vector<TetMeshGenerator::Point>& points, 
-                        const std::vector<TetMeshGenerator::Tetrahedron>& tetrahedra, 
+    static void relaxODT(std::vector<Mesh::Point>& points, 
+                        const std::vector<Mesh::Tetrahedron>& tetrahedra, 
                         int iterations = 1,
                         FixedPredicate isFixed = nullptr);
 };

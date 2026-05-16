@@ -1,18 +1,19 @@
 #include "utils.h"
+#include "TetDelMesher.h"
 
 int run_bench(int n) {
-    tetgenio in, out;
-    tetgenbehavior behavior;
-    behavior.voroout = 1;
-    behavior.quiet = 1;
+    TetDelMesher gen;
+    std::vector<double> points(n * 3);
+    generate_random_points(n, points.data());
+    
+    for (int i = 0; i < n; ++i) {
+        gen.addPoint(points[i * 3], points[i * 3 + 1], points[i * 3 + 2]);
+    }
 
-    in.numberofpoints = n;
-    in.pointlist = new REAL[n * 3];
-    generate_random_points(n, in.pointlist);
-
-    // Use the behavior object directly to enable Voronoi output
-    tetrahedralize(&behavior, &in, &out);
-    return out.numberoftetrahedra;
+    gen.setVoronoi(true);
+    gen.setQuiet(true);
+    auto mesh = gen.generate();
+    return static_cast<int>(mesh.tetrahedra.size());
 }
 
 int main() {

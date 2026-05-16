@@ -4906,7 +4906,7 @@ void tetgenmesh::initializepools()
   //   sizeof(tetrahedron)-byte address.
   point2simindex = ((pointmtrindex + sizeoftensor) * sizeof(REAL)
                  + sizeof(tetrahedron) - 1) / sizeof(tetrahedron);
-  if (b->plc || b->refine /*|| b->voroout*/) {
+  if (b->plc || b->refine || b->quality || b->fixedvolume || b->varvolume /*|| b->voroout*/) {
     // Increase the point size by three pointers, which are:
     //   - a pointer to a tet, read by point2tet();
     //   - a pointer to a parent point, read by point2ppt()).
@@ -4954,7 +4954,7 @@ void tetgenmesh::initializepools()
   }
   setpoint2tet(dummypoint, NULL);
   setpoint2ppt(dummypoint, NULL);
-  if (b->plc || b->psc || b->refine) {
+  if (b->plc || b->psc || b->refine || b->quality || b->fixedvolume || b->varvolume) {
     // Initialize the point-to-simplex field.
     setpoint2sh(dummypoint, NULL);
     if (b->metric && (bgm != NULL)) {
@@ -5038,7 +5038,7 @@ void tetgenmesh::initializepools()
            tetrahedrons->itembytes);
   }
 
-  if (b->plc || b->refine) { // if (b->useshelles) {
+  if (b->plc || b->refine || b->quality || b->fixedvolume || b->varvolume) { // if (b->useshelles) {
     // The number of bytes occupied by a subface.  The list of pointers
     //   stored in a subface are: three to other subfaces, three to corners,
     //   three to subsegments, two to tetrahedra.
@@ -12025,6 +12025,13 @@ void tetgenmesh::incrementaldelaunay(clock_t& tv)
   }
 
   tv = clock(); // Remember the time for sorting points.
+
+  if (in->numberofpoints < 4) {
+    // Not enough points to form a tetrahedron.
+    // Just return and let it be an empty triangulation.
+    delete [] permutarray;
+    return;
+  }
 
   // Calculate the diagonal size of its bounding box.
   bboxsize = sqrt(norm2(xmax - xmin, ymax - ymin, zmax - zmin));
