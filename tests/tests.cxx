@@ -9,18 +9,20 @@
 
 TEST_CASE("Tetrahedron Basic", "[tetgen][basic]") {
     TetDelMesher gen;
+    TetDelMesherConfig config;
     gen.addPoint(0, 0, 0);
     gen.addPoint(1, 0, 0);
     gen.addPoint(0, 1, 0);
     gen.addPoint(0, 0, 1);
-    gen.setQuiet(true);
-    auto mesh = gen.generate();
+    config.quiet = true;
+    auto mesh = ([&](){ gen.setConfig(config); return gen.generate(); }());
     CHECK(mesh.points.size() == 4);
     CHECK(mesh.tetrahedra.size() == 1);
 }
 
 TEST_CASE("Cube Tetrahedralization", "[tetgen][basic]") {
     TetDelMesher gen;
+    TetDelMesherConfig config;
     double coords[] = {
         0,0,0, 1,0,0, 1,1,0, 0,1,0,
         0,0,1, 1,0,1, 1,1,1, 0,1,1
@@ -28,24 +30,26 @@ TEST_CASE("Cube Tetrahedralization", "[tetgen][basic]") {
     for (int i = 0; i < 8; ++i) {
         gen.addPoint(coords[i * 3], coords[i * 3 + 1], coords[i * 3 + 2]);
     }
-    gen.setQuiet(true);
-    auto mesh = gen.generate();
+    config.quiet = true;
+    auto mesh = ([&](){ gen.setConfig(config); return gen.generate(); }());
     CHECK(mesh.points.size() == 8);
     CHECK(mesh.tetrahedra.size() >= 5);
 }
 
 TEST_CASE("Empty Point List", "[tetgen][edge]") {
     TetDelMesher gen;
-    gen.setQuiet(true);
-    auto mesh = gen.generate();
+    TetDelMesherConfig config;
+    config.quiet = true;
+    auto mesh = ([&](){ gen.setConfig(config); return gen.generate(); }());
     CHECK(mesh.points.size() == 0);
 }
 
 TEST_CASE("Single Point", "[tetgen][edge]") {
     TetDelMesher gen;
+    TetDelMesherConfig config;
     gen.addPoint(0, 0, 0);
-    gen.setQuiet(true);
-    auto mesh = gen.generate();
+    config.quiet = true;
+    auto mesh = ([&](){ gen.setConfig(config); return gen.generate(); }());
     // TetGen might throw or return partial result. TetDelMesher catches and returns empty mesh or partial.
     // Based on TetDelMesher implementation, it returns whatever 'out' has.
     CHECK(mesh.points.size() <= 1);
@@ -53,31 +57,34 @@ TEST_CASE("Single Point", "[tetgen][edge]") {
 
 TEST_CASE("Two Points", "[tetgen][edge]") {
     TetDelMesher gen;
+    TetDelMesherConfig config;
     gen.addPoint(0, 0, 0);
     gen.addPoint(1, 0, 0);
-    gen.setQuiet(true);
-    auto mesh = gen.generate();
+    config.quiet = true;
+    auto mesh = ([&](){ gen.setConfig(config); return gen.generate(); }());
     CHECK(mesh.points.size() <= 2);
 }
 
 TEST_CASE("Three Points (Collinear)", "[tetgen][edge]") {
     TetDelMesher gen;
+    TetDelMesherConfig config;
     gen.addPoint(0, 0, 0);
     gen.addPoint(1, 0, 0);
     gen.addPoint(2, 0, 0);
-    gen.setQuiet(true);
-    auto mesh = gen.generate();
+    config.quiet = true;
+    auto mesh = ([&](){ gen.setConfig(config); return gen.generate(); }());
     CHECK(mesh.points.size() <= 3);
 }
 
 TEST_CASE("Four Points (Tetrahedron)", "[tetgen][basic]") {
     TetDelMesher gen;
+    TetDelMesherConfig config;
     gen.addPoint(0, 0, 0);
     gen.addPoint(1, 0, 0);
     gen.addPoint(0, 1, 0);
     gen.addPoint(0, 0, 1);
-    gen.setQuiet(true);
-    auto mesh = gen.generate();
+    config.quiet = true;
+    auto mesh = ([&](){ gen.setConfig(config); return gen.generate(); }());
     CHECK(mesh.tetrahedra.size() == 1);
     REQUIRE(mesh.tetrahedra.size() > 0);
     for (const auto& tet : mesh.tetrahedra) {
@@ -89,19 +96,21 @@ TEST_CASE("Four Points (Tetrahedron)", "[tetgen][basic]") {
 
 TEST_CASE("Convex Hull Simple", "[tetgen][convex_hull]") {
     TetDelMesher gen;
+    TetDelMesherConfig config;
     gen.addPoint(0, 0, 0);
     gen.addPoint(1, 0, 0);
     gen.addPoint(0, 1, 0);
     gen.addPoint(0, 0, 1);
     gen.addPoint(0.1, 0.1, 0.1);
-    gen.setConvexHull(true);
-    gen.setQuiet(true);
-    auto mesh = gen.generate();
+    config.convexHull = true;
+    config.quiet = true;
+    auto mesh = ([&](){ gen.setConfig(config); return gen.generate(); }());
     CHECK(mesh.trifaces.size() >= 4);
 }
 
 TEST_CASE("Convex Hull Cube", "[tetgen][convex_hull]") {
     TetDelMesher gen;
+    TetDelMesherConfig config;
     double coords[] = {
         0,0,0, 1,0,0, 1,1,0, 0,1,0,
         0,0,1, 1,0,1, 1,1,1, 0,1,1,
@@ -110,9 +119,9 @@ TEST_CASE("Convex Hull Cube", "[tetgen][convex_hull]") {
     for (int i = 0; i < 9; ++i) {
         gen.addPoint(coords[i * 3], coords[i * 3 + 1], coords[i * 3 + 2]);
     }
-    gen.setConvexHull(true);
-    gen.setQuiet(true);
-    auto mesh = gen.generate();
+    config.convexHull = true;
+    config.quiet = true;
+    auto mesh = ([&](){ gen.setConfig(config); return gen.generate(); }());
     std::set<int> hull_points;
     for (const auto& tri : mesh.trifaces) {
         hull_points.insert(tri.v[0]);
@@ -124,13 +133,14 @@ TEST_CASE("Convex Hull Cube", "[tetgen][convex_hull]") {
 
 TEST_CASE("Voronoi Basic", "[tetgen][voronoi]") {
     TetDelMesher gen;
+    TetDelMesherConfig config;
     gen.addPoint(0, 0, 0);
     gen.addPoint(1, 0, 0);
     gen.addPoint(0, 1, 0);
     gen.addPoint(0, 0, 1);
-    gen.setVoronoi(true);
-    gen.setQuiet(true);
-    auto mesh = gen.generate();
+    config.voronoi = true;
+    config.quiet = true;
+    auto mesh = ([&](){ gen.setConfig(config); return gen.generate(); }());
     CHECK(mesh.vpoints.size() > 0);
     CHECK(mesh.vedges.size() > 0);
     CHECK(mesh.vfacets.size() > 0);
@@ -139,17 +149,19 @@ TEST_CASE("Voronoi Basic", "[tetgen][voronoi]") {
 
 TEST_CASE("Voronoi Multiple Points", "[tetgen][voronoi]") {
     TetDelMesher gen;
+    TetDelMesherConfig config;
     for (int i = 0; i < 8; i++) {
         gen.addPoint((i & 1) ? 1.0 : 0.0, (i & 2) ? 1.0 : 0.0, (i & 4) ? 1.0 : 0.0);
     }
-    gen.setVoronoi(true);
-    gen.setQuiet(true);
-    auto mesh = gen.generate();
+    config.voronoi = true;
+    config.quiet = true;
+    auto mesh = ([&](){ gen.setConfig(config); return gen.generate(); }());
     CHECK(mesh.vcells.size() == 8);
 }
 
 TEST_CASE("PLC Cube", "[tetgen][plc]") {
     TetDelMesher gen;
+    TetDelMesherConfig config;
     double coords[] = {
         0,0,0, 1,0,0, 1,1,0, 0,1,0,
         0,0,1, 1,0,1, 1,1,1, 0,1,1
@@ -165,15 +177,16 @@ TEST_CASE("PLC Cube", "[tetgen][plc]") {
     gen.addFacet({2, 3, 7, 6}, 1);
     gen.addFacet({3, 0, 4, 7}, 1);
 
-    gen.setPLC(true);
-    gen.setQuiet(true);
-    auto mesh = gen.generate();
+    config.isPLC = true;
+    config.quiet = true;
+    auto mesh = ([&](){ gen.setConfig(config); return gen.generate(); }());
     CHECK(mesh.points.size() >= 8);
     CHECK(mesh.tetrahedra.size() >= 5);
 }
 
 TEST_CASE("PLC Cube (formerly Hole)", "[tetgen][plc]") {
     TetDelMesher gen;
+    TetDelMesherConfig config;
     double coords[] = {
         0,0,0, 1,0,0, 1,1,0, 0,1,0,
         0,0,1, 1,0,1, 1,1,1, 0,1,1
@@ -189,24 +202,26 @@ TEST_CASE("PLC Cube (formerly Hole)", "[tetgen][plc]") {
     gen.addFacet({2, 3, 7, 6});
     gen.addFacet({3, 0, 4, 7});
 
-    gen.setPLC(true);
-    gen.setQuiet(true);
-    auto mesh = gen.generate();
+    config.isPLC = true;
+    config.quiet = true;
+    auto mesh = ([&](){ gen.setConfig(config); return gen.generate(); }());
     CHECK(mesh.points.size() >= 8);
     CHECK(mesh.tetrahedra.size() >= 5);
 }
 
 TEST_CASE("Quality Mesh", "[tetgen][quality]") {
     TetDelMesher gen;
+    TetDelMesherConfig config;
     double coords[] = {0,0,0, 1,0,0, 1,1,0, 0,1,0, 0,0,1, 1,0,1, 1,1,1, 0,1,1};
     for (int i = 0; i < 8; ++i) gen.addPoint(coords[i*3], coords[i*3+1], coords[i*3+2]);
-    gen.setQuiet(true);
-    auto mesh = gen.generate();
+    config.quiet = true;
+    auto mesh = ([&](){ gen.setConfig(config); return gen.generate(); }());
     CHECK(mesh.tetrahedra.size() > 0);
 }
 
 TEST_CASE("Quality with Ratio", "[tetgen][quality]") {
     TetDelMesher gen;
+    TetDelMesherConfig config;
     double coords[] = {0,0,0, 1,0,0, 1,1,0, 0,1,0, 0,0,1, 1,0,1, 1,1,1, 0,1,1};
     for (int i = 0; i < 8; ++i) gen.addPoint(coords[i*3], coords[i*3+1], coords[i*3+2]);
     
@@ -217,15 +232,16 @@ TEST_CASE("Quality with Ratio", "[tetgen][quality]") {
     gen.addFacet({2,3,7,6});
     gen.addFacet({3,0,4,7});
 
-    gen.setQuality(1.3);
-    gen.setPLC(true);
-    gen.setQuiet(true);
-    auto mesh = gen.generate();
+    config.useQuality = true; config.radiusEdgeRatio = 1.3;
+    config.isPLC = true;
+    config.quiet = true;
+    auto mesh = ([&](){ gen.setConfig(config); return gen.generate(); }());
     CHECK(mesh.tetrahedra.size() > 0);
 }
 
 TEST_CASE("Volume Constraint", "[tetgen][volume]") {
     TetDelMesher gen;
+    TetDelMesherConfig config;
     double coords[] = {0,0,0, 1,0,0, 1,1,0, 0,1,0, 0,0,1, 1,0,1, 1,1,1, 0,1,1};
     for (int i = 0; i < 8; ++i) gen.addPoint(coords[i*3], coords[i*3+1], coords[i*3+2]);
 
@@ -236,52 +252,57 @@ TEST_CASE("Volume Constraint", "[tetgen][volume]") {
     gen.addFacet({2,3,7,6});
     gen.addFacet({3,0,4,7});
 
-    gen.setQuality();
-    gen.setMaxVolume(0.01);
-    gen.setPLC(true);
-    gen.setQuiet(true);
-    auto mesh = gen.generate();
+    config.useQuality = true;
+    config.useMaxVolume = true; config.maxVolume = 0.01;
+    config.isPLC = true;
+    config.quiet = true;
+    auto mesh = ([&](){ gen.setConfig(config); return gen.generate(); }());
     CHECK(mesh.tetrahedra.size() > 0);
 }
 
 TEST_CASE("Refine Mesh", "[tetgen][refine]") {
     TetDelMesher gen;
+    TetDelMesherConfig config;
     double coords[] = {0,0,0, 1,0,0, 1,1,0, 0,1,0, 0,0,1, 1,0,1, 1,1,1, 0,1,1};
     for (int i = 0; i < 8; ++i) gen.addPoint(coords[i*3], coords[i*3+1], coords[i*3+2]);
-    gen.setQuiet(true);
-    auto mesh = gen.generate();
+    config.quiet = true;
+    auto mesh = ([&](){ gen.setConfig(config); return gen.generate(); }());
     int initial_tets = mesh.tetrahedra.size();
     REQUIRE(initial_tets > 0);
 
     TetDelMesher refiner;
+    TetDelMesherConfig config;
     refiner.refine(mesh);
-    refiner.setCustomSwitches("Qra0.001");
-    refiner.setQuiet(true);
-    auto refine_out = refiner.generate();
+    config.customSwitches = "Qra0.001";
+    config.quiet = true;
+    auto refine_out = ([&](){ refiner.setConfig(config); return refiner.generate(); }());
     CHECK(refine_out.tetrahedra.size() > initial_tets);
 }
 
 TEST_CASE("Boundary Output", "[tetgen][output]") {
     TetDelMesher gen;
+    TetDelMesherConfig config;
     double coords[] = {0,0,0, 1,0,0, 1,1,0, 0,1,0, 0,0,1, 1,0,1, 1,1,1, 0,1,1};
     for (int i = 0; i < 8; ++i) gen.addPoint(coords[i*3], coords[i*3+1], coords[i*3+2]);
-    gen.setCustomSwitches("Qf");
-    auto mesh = gen.generate();
+    config.customSwitches = "Qf";
+    auto mesh = ([&](){ gen.setConfig(config); return gen.generate(); }());
     CHECK(mesh.trifaces.size() > 0);
 }
 
 TEST_CASE("Neighbor Output", "[tetgen][output]") {
     TetDelMesher gen;
+    TetDelMesherConfig config;
     double coords[] = {0,0,0, 1,0,0, 1,1,0, 0,1,0, 0,0,1, 1,0,1, 1,1,1, 0,1,1};
     for (int i = 0; i < 8; ++i) gen.addPoint(coords[i*3], coords[i*3+1], coords[i*3+2]);
-    gen.setCustomSwitches("Qn");
-    auto mesh = gen.generate();
+    config.customSwitches = "Qn";
+    auto mesh = ([&](){ gen.setConfig(config); return gen.generate(); }());
     CHECK(mesh.tetrahedra.size() > 0);
     CHECK(!mesh.neighbors.empty());
 }
 
 TEST_CASE("TetDelMesher Basic", "[wrapper][basic]") {
     TetDelMesher gen;
+    TetDelMesherConfig config;
     gen.addPoint(0, 0, 0);
     gen.addPoint(1, 0, 0);
     gen.addPoint(1, 1, 0);
@@ -296,27 +317,29 @@ TEST_CASE("TetDelMesher Basic", "[wrapper][basic]") {
     gen.addFacet({1, 2, 6, 5});
     gen.addFacet({2, 3, 7, 6});
     gen.addFacet({3, 0, 4, 7});
-    gen.setPLC(true);
-    gen.setQuiet(true);
-    auto mesh = gen.generate();
+    config.isPLC = true;
+    config.quiet = true;
+    auto mesh = ([&](){ gen.setConfig(config); return gen.generate(); }());
     CHECK(mesh.points.size() >= 8);
     CHECK(mesh.tetrahedra.size() > 0);
 }
 
 TEST_CASE("TetDelMesher Points Only", "[wrapper][basic]") {
     TetDelMesher gen;
+    TetDelMesherConfig config;
     gen.addPoint(0, 0, 0);
     gen.addPoint(1, 0, 0);
     gen.addPoint(0, 1, 0);
     gen.addPoint(0, 0, 1);
     gen.addPoint(0.5, 0.2, 0.3);
-    gen.setQuiet(true);
-    auto mesh = gen.generate();
+    config.quiet = true;
+    auto mesh = ([&](){ gen.setConfig(config); return gen.generate(); }());
     CHECK(mesh.points.size() >= 5);
 }
 
 TEST_CASE("TetDelMesher Quality Settings", "[wrapper][quality]") {
     TetDelMesher gen;
+    TetDelMesherConfig config;
     // Use 8 points (cube) to be safer for quality constraints
     gen.addPoint(0, 0, 0);
     gen.addPoint(1, 0, 0);
@@ -326,26 +349,28 @@ TEST_CASE("TetDelMesher Quality Settings", "[wrapper][quality]") {
     gen.addPoint(1, 0, 1);
     gen.addPoint(1, 1, 1);
     gen.addPoint(0, 1, 1);
-    gen.setQuality(1.5, 10.0);
-    gen.setQuiet(true);
-    auto mesh = gen.generate();
+    config.useQuality = true; config.radiusEdgeRatio = 1.5; config.minDihedralAngle = 10.0;
+    config.quiet = true;
+    auto mesh = ([&](){ gen.setConfig(config); return gen.generate(); }());
     CHECK(mesh.tetrahedra.size() > 0);
 }
 
 TEST_CASE("TetDelMesher Max Volume", "[wrapper][volume]") {
     TetDelMesher gen;
+    TetDelMesherConfig config;
     gen.addPoint(0, 0, 0);
     gen.addPoint(1, 0, 0);
     gen.addPoint(0, 1, 0);
     gen.addPoint(0, 0, 1);
-    gen.setMaxVolume(0.01);
-    gen.setQuiet(true);
-    auto mesh = gen.generate();
+    config.useMaxVolume = true; config.maxVolume = 0.01;
+    config.quiet = true;
+    auto mesh = ([&](){ gen.setConfig(config); return gen.generate(); }());
     CHECK(mesh.tetrahedra.size() > 0);
 }
 
 TEST_CASE("TetDelMesher Isotropic", "[wrapper][isotropic]") {
     TetDelMesher gen;
+    TetDelMesherConfig config;
     gen.addPoint(0, 0, 0);
     gen.addPoint(1, 0, 0);
     gen.addPoint(1, 1, 0);
@@ -360,16 +385,17 @@ TEST_CASE("TetDelMesher Isotropic", "[wrapper][isotropic]") {
     gen.addFacet({1,2,6,5});
     gen.addFacet({2,3,7,6});
     gen.addFacet({3,0,4,7});
-    gen.setPLC(true);
-    gen.setIsotropic(0.3);
-    gen.setQuiet(true);
-    auto mesh = gen.generate();
+    config.isPLC = true;
+    config = TetDelMesherConfig::Isotropic(0.3);
+    config.quiet = true;
+    auto mesh = ([&](){ gen.setConfig(config); return gen.generate(); }());
     CHECK(mesh.points.size() > 8);
     CHECK(mesh.tetrahedra.size() > 0);
 }
 
 TEST_CASE("TetDelMesher Convex Hull", "[wrapper][hull]") {
     TetDelMesher gen;
+    TetDelMesherConfig config;
     gen.addPoint(0, 0, 0);
     gen.addPoint(1, 0, 0);
     gen.addPoint(1, 1, 0);
@@ -379,14 +405,15 @@ TEST_CASE("TetDelMesher Convex Hull", "[wrapper][hull]") {
     gen.addPoint(1, 1, 1);
     gen.addPoint(0, 1, 1);
     gen.addPoint(0.5, 0.5, 0.5);
-    gen.setConvexHull(true);
-    gen.setQuiet(true);
-    auto mesh = gen.generate();
+    config.convexHull = true;
+    config.quiet = true;
+    auto mesh = ([&](){ gen.setConfig(config); return gen.generate(); }());
     CHECK(mesh.points.size() >= 8);
 }
 
 TEST_CASE("TetDelMesher Holes", "[wrapper][holes]") {
     TetDelMesher gen;
+    TetDelMesherConfig config;
     for (int i = 0; i < 4; i++) {
         double angle = i * M_PI / 2;
         gen.addPoint(cos(angle), sin(angle), 0);
@@ -409,14 +436,15 @@ TEST_CASE("TetDelMesher Holes", "[wrapper][holes]") {
 
     gen.addHole(0.1, 0.1, 0.25);
     gen.addHole(-0.1, -0.1, 0.25);
-    gen.setPLC(true);
-    gen.setQuiet(true);
-    auto mesh = gen.generate();
+    config.isPLC = true;
+    config.quiet = true;
+    auto mesh = ([&](){ gen.setConfig(config); return gen.generate(); }());
     CHECK(mesh.tetrahedra.size() > 0);
 }
 
 TEST_CASE("TetDelMesher Custom Switches", "[wrapper][advanced]") {
     TetDelMesher gen;
+    TetDelMesherConfig config;
     gen.addPoint(0, 0, 0);
     gen.addPoint(1, 0, 0);
     gen.addPoint(1, 1, 0);
@@ -431,22 +459,23 @@ TEST_CASE("TetDelMesher Custom Switches", "[wrapper][advanced]") {
     gen.addFacet({1, 2, 6, 5});
     gen.addFacet({2, 3, 7, 6});
     gen.addFacet({3, 0, 4, 7});
-    gen.setPLC(true);
-    gen.setCustomSwitches("Qpq1.2a0.05");
-    gen.setQuiet(true);
-    auto mesh = gen.generate();
+    config.isPLC = true;
+    config.customSwitches = "Qpq1.2a0.05";
+    config.quiet = true;
+    auto mesh = ([&](){ gen.setConfig(config); return gen.generate(); }());
     CHECK(mesh.tetrahedra.size() > 0);
 }
 
 TEST_CASE("TetDelMesher Zero Index", "[wrapper][advanced]") {
     TetDelMesher gen;
+    TetDelMesherConfig config;
     gen.addPoint(0, 0, 0);
     gen.addPoint(1, 0, 0);
     gen.addPoint(0, 1, 0);
     gen.addPoint(0, 0, 1);
-    gen.setZeroIndex(true);
-    gen.setQuiet(true);
-    auto mesh = gen.generate();
+    config.zeroIndex = true;
+    config.quiet = true;
+    auto mesh = ([&](){ gen.setConfig(config); return gen.generate(); }());
     bool has_zero = false;
     for (const auto& t : mesh.tetrahedra) {
         for (int i = 0; i < 4; i++) {
@@ -458,18 +487,20 @@ TEST_CASE("TetDelMesher Zero Index", "[wrapper][advanced]") {
 
 TEST_CASE("TetDelMesher Verbose", "[wrapper][advanced]") {
     TetDelMesher gen;
+    TetDelMesherConfig config;
     gen.addPoint(0, 0, 0);
     gen.addPoint(1, 0, 0);
     gen.addPoint(0, 1, 0);
     gen.addPoint(0, 0, 1);
-    gen.setVerbose(0);
-    gen.setQuiet(true);
-    auto mesh = gen.generate();
+    config.verbose = 0;
+    config.quiet = true;
+    auto mesh = ([&](){ gen.setConfig(config); return gen.generate(); }());
     CHECK(mesh.tetrahedra.size() == 1);
 }
 
 TEST_CASE("MeshOptimizer Laplacian Smoothing", "[optimizer][smoothing]") {
     TetDelMesher gen;
+    TetDelMesherConfig config;
     gen.addPoint(0, 0, 0);
     gen.addPoint(1, 0, 0);
     gen.addPoint(1, 1, 0);
@@ -484,10 +515,10 @@ TEST_CASE("MeshOptimizer Laplacian Smoothing", "[optimizer][smoothing]") {
     gen.addFacet({1, 2, 6, 5});
     gen.addFacet({2, 3, 7, 6});
     gen.addFacet({3, 0, 4, 7});
-    gen.setIsotropic(0.5);
-    gen.setPLC(true);
-    gen.setQuiet(true);
-    auto mesh = gen.generate();
+    config = TetDelMesherConfig::Isotropic(0.5);
+    config.isPLC = true;
+    config.quiet = true;
+    auto mesh = ([&](){ gen.setConfig(config); return gen.generate(); }());
     REQUIRE(mesh.points.size() > 8);
     REQUIRE(mesh.tetrahedra.size() > 0);
 
@@ -505,6 +536,7 @@ TEST_CASE("MeshOptimizer Laplacian Smoothing", "[optimizer][smoothing]") {
 
 TEST_CASE("MeshOptimizer ODT Relaxation", "[optimizer][odt]") {
     TetDelMesher gen;
+    TetDelMesherConfig config;
     gen.addPoint(0, 0, 0);
     gen.addPoint(1, 0, 0);
     gen.addPoint(1, 1, 0);
@@ -519,10 +551,10 @@ TEST_CASE("MeshOptimizer ODT Relaxation", "[optimizer][odt]") {
     gen.addFacet({1, 2, 6, 5});
     gen.addFacet({2, 3, 7, 6});
     gen.addFacet({3, 0, 4, 7});
-    gen.setIsotropic(0.5);
-    gen.setPLC(true);
-    gen.setQuiet(true);
-    auto mesh = gen.generate();
+    config = TetDelMesherConfig::Isotropic(0.5);
+    config.isPLC = true;
+    config.quiet = true;
+    auto mesh = ([&](){ gen.setConfig(config); return gen.generate(); }());
     REQUIRE(mesh.points.size() > 8);
     REQUIRE(mesh.tetrahedra.size() > 0);
 
@@ -540,6 +572,7 @@ TEST_CASE("MeshOptimizer ODT Relaxation", "[optimizer][odt]") {
 
 TEST_CASE("MeshOptimizer No Fixed Points", "[optimizer][smoothing]") {
     TetDelMesher gen;
+    TetDelMesherConfig config;
     gen.addPoint(0, 0, 0);
     gen.addPoint(1, 0, 0);
     gen.addPoint(1, 1, 0);
@@ -554,10 +587,10 @@ TEST_CASE("MeshOptimizer No Fixed Points", "[optimizer][smoothing]") {
     gen.addFacet({1, 2, 6, 5});
     gen.addFacet({2, 3, 7, 6});
     gen.addFacet({3, 0, 4, 7});
-    gen.setIsotropic(0.5);
-    gen.setPLC(true);
-    gen.setQuiet(true);
-    auto mesh = gen.generate();
+    config = TetDelMesherConfig::Isotropic(0.5);
+    config.isPLC = true;
+    config.quiet = true;
+    auto mesh = ([&](){ gen.setConfig(config); return gen.generate(); }());
     REQUIRE(mesh.points.size() > 8);
 
     size_t original_count = mesh.points.size();
@@ -567,6 +600,7 @@ TEST_CASE("MeshOptimizer No Fixed Points", "[optimizer][smoothing]") {
 
 TEST_CASE("MeshOptimizer Zero Iterations", "[optimizer][smoothing]") {
     TetDelMesher gen;
+    TetDelMesherConfig config;
     gen.addPoint(0, 0, 0);
     gen.addPoint(1, 0, 0);
     gen.addPoint(1, 1, 0);
@@ -581,10 +615,10 @@ TEST_CASE("MeshOptimizer Zero Iterations", "[optimizer][smoothing]") {
     gen.addFacet({1, 2, 6, 5});
     gen.addFacet({2, 3, 7, 6});
     gen.addFacet({3, 0, 4, 7});
-    gen.setIsotropic(0.5);
-    gen.setPLC(true);
-    gen.setQuiet(true);
-    auto mesh = gen.generate();
+    config = TetDelMesherConfig::Isotropic(0.5);
+    config.isPLC = true;
+    config.quiet = true;
+    auto mesh = ([&](){ gen.setConfig(config); return gen.generate(); }());
     REQUIRE(mesh.points.size() > 8);
 
     std::vector<Mesh::Point> original_points = mesh.points;
@@ -600,12 +634,13 @@ TEST_CASE("MeshOptimizer Zero Iterations", "[optimizer][smoothing]") {
 
 TEST_CASE("Point Validity Check", "[geometry]") {
     TetDelMesher gen;
+    TetDelMesherConfig config;
     gen.addPoint(0, 0, 0);
     gen.addPoint(1, 0, 0);
     gen.addPoint(0, 1, 0);
     gen.addPoint(0, 0, 1);
-    gen.setQuiet(true);
-    auto mesh = gen.generate();
+    config.quiet = true;
+    auto mesh = ([&](){ gen.setConfig(config); return gen.generate(); }());
 
     for (const auto& p : mesh.points) {
         CHECK(std::isfinite(p.x));
@@ -616,12 +651,13 @@ TEST_CASE("Point Validity Check", "[geometry]") {
 
 TEST_CASE("Tetrahedron Validity", "[geometry]") {
     TetDelMesher gen;
+    TetDelMesherConfig config;
     gen.addPoint(0, 0, 0);
     gen.addPoint(1, 0, 0);
     gen.addPoint(0, 1, 0);
     gen.addPoint(0, 0, 1);
-    gen.setQuiet(true);
-    auto mesh = gen.generate();
+    config.quiet = true;
+    auto mesh = ([&](){ gen.setConfig(config); return gen.generate(); }());
     REQUIRE(mesh.tetrahedra.size() > 0);
 
     for (const auto& tet : mesh.tetrahedra) {
@@ -635,6 +671,7 @@ TEST_CASE("Tetrahedron Validity", "[geometry]") {
 
 TEST_CASE("Mesh Connectivity", "[geometry]") {
     TetDelMesher gen;
+    TetDelMesherConfig config;
     gen.addPoint(0, 0, 0);
     gen.addPoint(1, 0, 0);
     gen.addPoint(1, 1, 0);
@@ -649,10 +686,10 @@ TEST_CASE("Mesh Connectivity", "[geometry]") {
     gen.addFacet({1, 2, 6, 5});
     gen.addFacet({2, 3, 7, 6});
     gen.addFacet({3, 0, 4, 7});
-    gen.setIsotropic(0.4);
-    gen.setPLC(true);
-    gen.setQuiet(true);
-    auto mesh = gen.generate();
+    config = TetDelMesherConfig::Isotropic(0.4);
+    config.isPLC = true;
+    config.quiet = true;
+    auto mesh = ([&](){ gen.setConfig(config); return gen.generate(); }());
     REQUIRE(mesh.tetrahedra.size() > 0);
 
     for (const auto& t : mesh.tetrahedra) {
@@ -667,19 +704,21 @@ TEST_CASE("Mesh Connectivity", "[geometry]") {
 
 TEST_CASE("Large Point Set", "[performance]") {
     TetDelMesher gen;
+    TetDelMesherConfig config;
     std::mt19937 rng(42);
     std::uniform_real_distribution<double> dist(0.0, 1.0);
     for (int i = 0; i < 100; i++) {
         gen.addPoint(dist(rng), dist(rng), dist(rng));
     }
-    gen.setQuiet(true);
-    auto mesh = gen.generate();
+    config.quiet = true;
+    auto mesh = ([&](){ gen.setConfig(config); return gen.generate(); }());
     CHECK(mesh.points.size() >= 100);
     CHECK(mesh.tetrahedra.size() > 0);
 }
 
 TEST_CASE("Multiple Holes", "[tetgen][holes]") {
     TetDelMesher gen;
+    TetDelMesherConfig config;
     for (int i = 0; i < 4; i++) {
         double angle = i * M_PI / 2;
         gen.addPoint(cos(angle), sin(angle), 0);
@@ -703,14 +742,15 @@ TEST_CASE("Multiple Holes", "[tetgen][holes]") {
     gen.addHole(0.2, 0.0, 0.25);
     gen.addHole(-0.2, 0.0, 0.25);
     gen.addHole(0.0, 0.2, 0.25);
-    gen.setPLC(true);
-    gen.setQuiet(true);
-    auto mesh = gen.generate();
+    config.isPLC = true;
+    config.quiet = true;
+    auto mesh = ([&](){ gen.setConfig(config); return gen.generate(); }());
     CHECK(mesh.tetrahedra.size() > 0);
 }
 
 TEST_CASE("Weighted Tetrahedralization", "[tetgen][weighted]") {
     TetDelMesher gen;
+    TetDelMesherConfig config;
     gen.addPoint(0, 0, 0);
     gen.addPoint(1, 0, 0);
     gen.addPoint(0, 1, 0);
@@ -718,14 +758,15 @@ TEST_CASE("Weighted Tetrahedralization", "[tetgen][weighted]") {
 
     for (int i = 0; i < 4; ++i) gen.addPointAttribute(i, 0.1);
 
-    gen.setWeighted(true);
-    gen.setQuiet(true);
-    auto mesh = gen.generate();
+    config.weighted = true;
+    config.quiet = true;
+    auto mesh = ([&](){ gen.setConfig(config); return gen.generate(); }());
     CHECK(mesh.points.size() >= 4);
 }
 
 TEST_CASE("Mesh Preserves Input Points", "[geometry]") {
     TetDelMesher gen;
+    TetDelMesherConfig config;
     std::vector<std::array<double, 3>> input_points = {
         {0, 0, 0}, {1, 0, 0}, {1, 1, 0}, {0, 1, 0},
         {0, 0, 1}, {1, 0, 1}, {1, 1, 1}, {0, 1, 1}
@@ -739,9 +780,9 @@ TEST_CASE("Mesh Preserves Input Points", "[geometry]") {
     gen.addFacet({1, 2, 6, 5});
     gen.addFacet({2, 3, 7, 6});
     gen.addFacet({3, 0, 4, 7});
-    gen.setPLC(true);
-    gen.setQuiet(true);
-    auto mesh = gen.generate();
+    config.isPLC = true;
+    config.quiet = true;
+    auto mesh = ([&](){ gen.setConfig(config); return gen.generate(); }());
 
     bool found_all_original = true;
     for (const auto& input : input_points) {

@@ -8,7 +8,7 @@ obj/
 tetgen
 
 # Benchmarks output
-bench/*.csv
+*.csv
 bench/*.png
 
 # OS files

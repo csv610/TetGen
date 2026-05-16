@@ -44,7 +44,7 @@ def main():
         else:
             print(f"Warning: Binary {b} not found in {build_dir}")
 
-    print("\nAll benchmarks completed. CSV files generated in the build directory.")
+    print("\nAll benchmarks completed. CSV files generated in the bench/ directory.")
 
 if __name__ == "__main__":
     main()

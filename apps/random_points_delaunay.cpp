@@ -65,7 +65,9 @@ int main(int argc, char* argv[]) {
     std::cout << "Generating Delaunay tetrahedralization..." << std::endl;
     // Set quiet mode off to see TetGen output if desired, or keep it quiet for a clean CLI.
     // Let's keep it quiet but print our own status.
-    mesher.setQuiet(true);
+    TetDelMesherConfig config;
+    config.quiet = true;
+    mesher.setConfig(config);
     Mesh mesh = mesher.generate();
 
     std::cout << "Mesh generated successfully!" << std::endl;

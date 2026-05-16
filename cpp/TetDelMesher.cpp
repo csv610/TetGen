@@ -7,6 +7,7 @@
 
 struct TetDelMesher::Impl {
     tetgenbehavior behavior;
+    TetDelMesherConfig config;
     
     std::vector<double> points;
     std::vector<int> pointMarkers;
@@ -17,12 +18,67 @@ struct TetDelMesher::Impl {
     std::vector<int> tetrahedra;
 
     Impl() {
-        behavior.quiet = 1; // Default to quiet
+        applyConfig(config);
     }
+
+    void applyConfig(const TetDelMesherConfig& c) {
+        config = c;
+        behavior.quiet = config.quiet ? 1 : 0;
+        behavior.verbose = config.verbose;
+        behavior.quality = config.useQuality ? 1 : 0;
+        behavior.minratio = config.radiusEdgeRatio;
+        behavior.mindihedral = config.minDihedralAngle;
+        behavior.fixedvolume = config.useMaxVolume ? 1 : 0;
+        behavior.maxvolume = config.maxVolume;
+        behavior.plc = config.isPLC ? 1 : 0;
+        behavior.nobisect = config.preserveSurface ? 1 : 0;
+        behavior.refine = config.refineMesh ? 1 : 0;
+        behavior.coarsen = config.coarsenMesh ? 1 : 0;
+        behavior.weighted = config.weighted ? 1 : 0;
+        behavior.convex = config.convexHull ? 1 : 0;
+        behavior.diagnose = config.detectSelfIntersections ? 1 : 0;
+        behavior.zeroindex = config.zeroIndex ? 1 : 0;
+        behavior.docheck = config.check ? 1 : 0;
+        behavior.voroout = config.voronoi ? 1 : 0;
+
+        // Optimization and Precision
+        behavior.opt_max_flip_level = config.optimizationLevel;
+        behavior.epsilon = config.tolerance;
+        behavior.noexact = config.useExactArithmetic ? 0 : 1;
+        behavior.nomergefacet = config.mergeCoplanar ? 0 : 1;
+        behavior.nomergevertex = config.mergeCoplanar ? 0 : 1;
+
+        // Output formatting
+        behavior.facesout = config.outputFaces ? 1 : 0;
+        behavior.edgesout = config.outputEdges ? 1 : 0;
+        behavior.neighout = config.outputNeighbors ? 1 : 0;
+        behavior.vtkview = config.outputVtk ? 1 : 0;
+        behavior.meditview = config.outputMedit ? 1 : 0;
+
+        // Suppression
+        behavior.nobound = config.suppressBoundaryInfo ? 1 : 0;
+        behavior.nonodewritten = config.suppressNodeFile ? 1 : 0;
+        behavior.noelewritten = config.suppressElementFile ? 1 : 0;
+        behavior.noiterationnum = config.suppressIterationNumbers ? 1 : 0;
+
+        if (!config.customSwitches.empty()) {
+            char* s = const_cast<char*>(config.customSwitches.c_str());
+            behavior.parse_commandline(s);
+        }
+    }
+
 };
 
 TetDelMesher::TetDelMesher() : impl(std::make_unique<Impl>()) {}
 TetDelMesher::~TetDelMesher() = default;
+
+void TetDelMesher::setConfig(const TetDelMesherConfig& config) {
+    impl->applyConfig(config);
+}
+
+TetDelMesherConfig TetDelMesher::getConfig() const {
+    return impl->config;
+}
 
 void TetDelMesher::addPoint(double x, double y, double z, int marker) {
     impl->points.push_back(x);
@@ -69,62 +125,6 @@ void TetDelMesher::refine(const Mesh& mesh) {
             impl->tetrahedra.push_back(t.v[i]);
         }
     }
-}
-
-void TetDelMesher::setQuiet(bool quiet) {
-    impl->behavior.quiet = quiet ? 1 : 0;
-}
-
-void TetDelMesher::setQuality(double radiusEdgeRatio, double minDihedralAngle) {
-    impl->behavior.quality = 1;
-    impl->behavior.minratio = radiusEdgeRatio;
-    impl->behavior.mindihedral = minDihedralAngle;
-}
-
-void TetDelMesher::setMaxVolume(double volume) {
-    impl->behavior.fixedvolume = 1;
-    impl->behavior.maxvolume = volume;
-}
-
-void TetDelMesher::setPLC(bool isPLC) {
-    impl->behavior.plc = isPLC ? 1 : 0;
-}
-
-void TetDelMesher::setConvexHull(bool enable) {
-    impl->behavior.convex = enable ? 1 : 0;
-}
-
-void TetDelMesher::setWeighted(bool enable) {
-    impl->behavior.weighted = enable ? 1 : 0;
-}
-
-void TetDelMesher::setZeroIndex(bool enable) {
-    impl->behavior.zeroindex = enable ? 1 : 0;
-}
-
-void TetDelMesher::setCheck(bool enable) {
-    impl->behavior.docheck = enable ? 1 : 0;
-}
-
-void TetDelMesher::setVerbose(int level) {
-    impl->behavior.verbose = level;
-}
-
-void TetDelMesher::setVoronoi(bool enable) {
-    impl->behavior.voroout = enable ? 1 : 0;
-}
-
-void TetDelMesher::setIsotropic(double edgeLength) {
-    impl->behavior.quality = 1;
-    impl->behavior.minratio = 1.414;
-    impl->behavior.fixedvolume = 1;
-    // Volume of a regular tetrahedron with side length L: V = L^3 / (6 * sqrt(2))
-    impl->behavior.maxvolume = (edgeLength * edgeLength * edgeLength) / (6.0 * std::sqrt(2.0));
-}
-
-void TetDelMesher::setCustomSwitches(const std::string& switches) {
-    char* s = const_cast<char*>(switches.c_str());
-    impl->behavior.parse_commandline(s);
 }
 
 Mesh TetDelMesher::generate() {

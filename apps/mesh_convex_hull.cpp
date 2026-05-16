@@ -58,8 +58,10 @@ int main(int argc, char* argv[]) {
     }
 
     std::cout << "Computing convex hull of " << totalPoints << " points ..." << std::endl;
-    mesher.setConvexHull(true);
-    mesher.setQuiet(true);
+    TetDelMesherConfig config;
+    config.convexHull = true;
+    config.quiet = true;
+    mesher.setConfig(config);
     Mesh hullMesh = mesher.generate();
 
     std::cout << "Convex hull computed successfully!" << std::endl;

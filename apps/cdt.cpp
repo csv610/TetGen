@@ -83,8 +83,10 @@ int main(int argc, char* argv[]) {
     std::cout << "  Triangles: " << totalInputFaces << std::endl;
 
     std::cout << "Generating Constrained Delaunay Tetrahedralization..." << std::endl;
-    mesher.setPLC(true);
-    mesher.setQuiet(true);
+    TetDelMesherConfig config;
+    config.isPLC = true;
+    config.quiet = true;
+    mesher.setConfig(config);
     Mesh outputMesh = mesher.generate();
 
     std::cout << "CDT generated successfully!" << std::endl;

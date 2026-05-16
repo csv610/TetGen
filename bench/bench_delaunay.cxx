@@ -10,7 +10,9 @@ int run_bench(int n) {
         gen.addPoint(points[i * 3], points[i * 3 + 1], points[i * 3 + 2]);
     }
 
-    gen.setQuiet(true);
+    TetDelMesherConfig config;
+    config.quiet = true;
+    gen.setConfig(config);
     auto mesh = gen.generate();
     return static_cast<int>(mesh.tetrahedra.size());
 }
@@ -22,6 +24,6 @@ int main() {
     for (int n = 100000; n <= 1000000; n += 100000) {
         results.push_back(profile("Delaunay Triangulation", n, [n]() { return run_bench(n); }));
     }
-    save_results_csv("bench_delaunay.csv", results);
+    save_results_csv("bench/bench_delaunay.csv", results);
     return 0;
 }

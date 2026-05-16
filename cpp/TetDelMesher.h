@@ -5,6 +5,7 @@
 #include <string>
 #include <memory>
 #include "Mesh.h"
+#include "TetDelMesherConfig.h"
 
 /**
  * @brief A high-level wrapper for the TetGen library.
@@ -15,6 +16,10 @@ class TetDelMesher {
 public:
     TetDelMesher();
     ~TetDelMesher();
+
+    // Configuration
+    void setConfig(const TetDelMesherConfig& config);
+    TetDelMesherConfig getConfig() const;
 
     // Geometry Input
     void addPoint(double x, double y, double z, int marker = 0);
@@ -28,32 +33,6 @@ public:
      * @brief Loads an existing mesh for refinement.
      */
     void refine(const Mesh& mesh);
-
-    // Configuration
-    void setQuiet(bool quiet);
-    void setQuality(double radiusEdgeRatio = 2.0, double minDihedralAngle = 0.0);
-    void setMaxVolume(double volume);
-    void setPLC(bool isPLC);
-    void setConvexHull(bool enable);
-    void setWeighted(bool enable);
-    void setZeroIndex(bool enable);
-    void setCheck(bool enable);
-    void setVerbose(int level);
-    void setVoronoi(bool enable);
-    
-    /**
-     * @brief Sets constraints for an isotropic mesh based on desired edge length.
-     * 
-     * Calculates the maximum volume based on the edge length of a regular tetrahedron
-     * and sets a quality bound (radius-edge ratio) to 1.414.
-     */
-    void setIsotropic(double edgeLength);
-
-    /**
-     * @brief Allows setting any TetGen switch directly via a string.
-     * Example: "pq1.414a.1" for quality and volume constraints.
-     */
-    void setCustomSwitches(const std::string& switches);
 
     // Generation
     Mesh generate();

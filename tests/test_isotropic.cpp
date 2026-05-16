@@ -4,6 +4,7 @@
 
 int main() {
     TetDelMesher gen;
+    TetDelMesherConfig config;
     
     // Create a simple box
     gen.addPoint(0, 0, 0);
@@ -23,10 +24,10 @@ int main() {
     gen.addFacet({0, 3, 7, 4}); // Left
     gen.addFacet({1, 2, 6, 5}); // Right
     
-    gen.setPLC(true);
-    gen.setIsotropic(0.2); // Small edge length for isotropic mesh
+    config.isPLC = true;
+    config = TetDelMesherConfig::Isotropic(0.2); // Small edge length for isotropic mesh
     
-    Mesh mesh = gen.generate();
+    Mesh mesh = ([&](){ gen.setConfig(config); return gen.generate(); }());
     
     std::cout << "Points: " << mesh.points.size() << std::endl;
     std::cout << "Tetrahedra: " << mesh.tetrahedra.size() << std::endl;

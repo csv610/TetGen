@@ -29,8 +29,10 @@ int bench_cube() {
     TetDelMesher gen;
     int start_node = 0;
     add_cube(gen, 0, 0, 0, 10.0, start_node);
-    gen.setPLC(true);
-    gen.setQuiet(true);
+    TetDelMesherConfig config;
+    config.isPLC = true;
+    config.quiet = true;
+    gen.setConfig(config);
     auto mesh = gen.generate();
     return static_cast<int>(mesh.tetrahedra.size());
 }
@@ -43,8 +45,10 @@ int bench_shell() {
     // Add a hole point in the center to make it a shell
     gen.addHole(0, 0, 0);
     
-    gen.setPLC(true);
-    gen.setQuiet(true);
+    TetDelMesherConfig config;
+    config.isPLC = true;
+    config.quiet = true;
+    gen.setConfig(config);
     auto mesh = gen.generate();
     return static_cast<int>(mesh.tetrahedra.size());
 }
@@ -58,8 +62,10 @@ int run_bench(int n) {
         gen.addPoint(points[i * 3], points[i * 3 + 1], points[i * 3 + 2]);
     }
 
-    gen.setPLC(true);
-    gen.setQuiet(true);
+    TetDelMesherConfig config;
+    config.isPLC = true;
+    config.quiet = true;
+    gen.setConfig(config);
     auto mesh = gen.generate();
     return static_cast<int>(mesh.tetrahedra.size());
 }
@@ -74,6 +80,6 @@ int main() {
     for (int n = 100000; n <= 1000000; n += 100000) {
         results.push_back(profile("CDT Random Points", n, [n]() { return run_bench(n); }));
     }
-    save_results_csv("bench_cdt.csv", results);
+    save_results_csv("bench/bench_cdt.csv", results);
     return 0;
 }
